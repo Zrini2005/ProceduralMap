@@ -13,8 +13,10 @@ class SceneMain extends Phaser.Scene {
     this.load.image("tree1", "content/tree1.png");
     this.load.image("tree2", "content/tree2.png");
     this.load.image("tree3", "content/tree3.png");
+    this.load.image("sprNewTry", "content/sprHighland.png");
     this.load.image("smallHouse", "content/smallHouse.png");
-    this.load.image("bush", "content/sprHighland.png");
+    this.load.image('dungeon', 'content/dungeon.png');
+    this.load.image("bush", "content/mountain_landscape.png");
     this.load.image("icedLake", "content/icedLake.png");
     this.load.spritesheet('adventurer', 'content/adventurer.webp', {
       frameWidth: 256, // Width of a single frame
@@ -89,7 +91,21 @@ class SceneMain extends Phaser.Scene {
     this.player = this.add.sprite(this.cameras.main.width / 2, this.cameras.main.height / 2, "adventurer");
     this.player.setPosition(0, 0);
     this.player.setDepth(10);
-    this.player.setScale(0.5); // Adjust player size to fit screen
+    this.player.setScale(0.3); // Adjust player size to fit screen
+
+    const dungeonRadius = 20;  
+    const randomAngle = Phaser.Math.FloatBetween(0, Math.PI * 2);  
+    const randomDistance = Phaser.Math.FloatBetween(0, dungeonRadius);  
+
+    // Convert polar to Cartesian coordinates
+    const dungeonX = this.player.x + Math.cos(randomAngle) * randomDistance;
+    const dungeonY = this.player.y + Math.sin(randomAngle) * randomDistance;
+
+    // Add the dungeon sprite
+    const dungeon = this.add.sprite(dungeonX, dungeonY, "dungeon");  
+    dungeon.setOrigin(0.5, 0.5);
+    dungeon.setScale(0.5);  
+    dungeon.setDepth(5);  
   }
 
   getChunk(x, y) {
@@ -159,6 +175,6 @@ class SceneMain extends Phaser.Scene {
 
     this.cameras.main.centerOn(this.followPoint.x, this.followPoint.y);
     this.player.x = this.followPoint.x;
-  this.player.y = this.followPoint.y;
+    this.player.y = this.followPoint.y;
   }
 }

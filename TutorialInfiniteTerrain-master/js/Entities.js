@@ -30,12 +30,17 @@ class Chunk {
           var key = "";
           var animationKey = "";
 
-          if (perlinValue < 0.05) {
-            key = "sprWater";
-            animationKey = "sprWater";
-            waterTiles.push({ x: tileX, y: tileY });
-          } else if (perlinValue >= 0.05 && perlinValue < 0.2) {
+          // if (perlinValue < 0.05) {
+          //   key = "sprWater";
+          //   animationKey = "sprWater";
+          //   waterTiles.push({ x: tileX, y: tileY });
+          // }
+          if ( perlinValue < 0.1) {
             key = "sprSand";
+            waterTiles.push({ x: tileX, y: tileY });
+          } else if(perlinValue >= 0.1 && perlinValue < 0.2){
+            key = "sprNewTry";
+            
           } else if (perlinValue >= 0.2) {
             key = "sprGrass";
             grassTiles.push({ x: tileX, y: tileY }); // Add grass tile position
@@ -84,17 +89,17 @@ class Chunk {
         if (assetNoise > 0.2) {
           var assetType;
           if (assetNoise <= 0.5) {
-            assetType = "icedLake";
-          } else if (assetNoise <= 0.6) {
             assetType = "bush";
+          } else if (assetNoise <= 0.6) {
+            assetType = "icedLake";
           } else {
-            assetType = "smallHouse";
+            assetType = "icedLake";
           }
           const assetWidth = this.scene.textures.get(assetType).getSourceImage().width;
           const assetHeight = this.scene.textures.get(assetType).getSourceImage().height;
 
-          const scaleX = 0.05 + this.scene.tileSize / assetWidth;
-          const scaleY = 0.05 + this.scene.tileSize / assetHeight;
+          const scaleX = -0.00 + this.scene.tileSize / assetWidth;
+          const scaleY = -0.00 + this.scene.tileSize / assetHeight;
  
           var asset = new Phaser.GameObjects.Sprite(this.scene, waterTile.x + 8, waterTile.y + 8, assetType); // Centered on the tile
           asset.setOrigin(0.5, 1);  
