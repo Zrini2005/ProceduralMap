@@ -5,12 +5,15 @@ class Chunk {
     this.y = y;
     this.tiles = this.scene.add.group();
     this.isLoaded = false;
+    //noise.seed(Math.random());
+    this.occupiedAreas = [];
   }
 
   unload() {
     if (this.isLoaded) {
       this.tiles.clear(true, true);
       this.isLoaded = false;
+      this.occupiedAreas = [];
     }
   }
 
@@ -18,6 +21,7 @@ class Chunk {
     if (!this.isLoaded) {
       const grassTiles = []; // Keep track of grass tile positions
       const waterTiles = [];
+      const sandTiles = [];
 
       // Step 1: Generate tiles
       for (var x = 0; x < this.scene.chunkSize; x++) {
@@ -48,6 +52,8 @@ class Chunk {
 
           // Add the main tile sprite
           var tile = new Tile(this.scene, tileX, tileY, key);
+          //tile.setScale(2,2);
+
 
           if (animationKey !== "") {
             tile.play(animationKey);
@@ -78,6 +84,7 @@ class Chunk {
           const scaleY = 0.05 + this.scene.tileSize / assetHeight;
           var tree = new Phaser.GameObjects.Sprite(this.scene, grassTile.x + 8, grassTile.y + 8, treeType); // Centered on the tile
           tree.setOrigin(0.5, 1); // Align the tree's bottom to the tile
+          tree.setDepth(8); // Sort by Y position
           tree.setScale(scaleX, scaleY); // Scale down to fit the tile size
           this.tiles.add(tree);
           this.scene.add.existing(tree);
@@ -103,9 +110,13 @@ class Chunk {
  
           var asset = new Phaser.GameObjects.Sprite(this.scene, waterTile.x + 8, waterTile.y + 8, assetType); // Centered on the tile
           asset.setOrigin(0.5, 1);  
+          asset.setDepth(8); // Sort by Y position
           asset.setScale(scaleX, scaleY);  
           this.tiles.add(asset);
           this.scene.add.existing(asset);
+        }
+        else{
+          this.placeAssetOnSand(waterTile.x, waterTile.y);
         }
         // else{
         //   var assetType="icedLake";
@@ -119,9 +130,77 @@ class Chunk {
         // }
       });
 
+       
+
       this.isLoaded = true;
     }
   }
+  placeAssetOnSand(worldX, worldY) {
+    const hashValue = this.hash(worldX, worldY);
+    const tileSize = this.scene.tileSize;
+    let assetType;
+
+    // Determine which asset to place based on hash value
+    if (hashValue > 0.1 && hashValue <= 0.105) {
+      assetType = "asset1";
+    } else if (hashValue > 0.5 && hashValue <= 0.505) {
+      assetType = "asset2";
+    } else if (hashValue > 0.995) {
+      assetType = "asset3";
+    } else {
+      return; // No asset to place for this tile
+    }
+
+    // Get asset size for bounding box calculation
+    const assetWidth = this.scene.textures.get(assetType).getSourceImage().width;
+    const assetHeight = this.scene.textures.get(assetType).getSourceImage().height;
+    const scaleX = tileSize / assetWidth * 4.5; // Increase scale factor
+    const scaleY = tileSize / assetHeight * 4.5;
+    const assetWidthScaled = assetWidth * scaleX;
+    const assetHeightScaled = assetHeight * scaleY;
+
+    const assetBounds = {
+      x: worldX - assetWidthScaled / 2,
+      y: worldY - assetHeightScaled / 2,
+      width: assetWidthScaled,
+      height: assetHeightScaled,
+    };
+
+    // Check for overlaps
+    if (this.isOverlapping(assetBounds)) {
+      return; // Skip placement if overlapping
+    }
+
+    // Place the asset
+    const asset = new Phaser.GameObjects.Sprite(this.scene, worldX + tileSize / 2, worldY + tileSize / 2, assetType);
+    asset.setOrigin(0.5, 1);
+    asset.setScale(scaleX, scaleY);
+    asset.setDepth(9); // Sort by Y position
+    this.tiles.add(asset);
+    
+    this.scene.add.existing(asset);
+
+    // Add asset bounds to occupied areas
+    this.occupiedAreas.push(assetBounds);
+  }
+
+  isOverlapping(bounds) {
+    return this.occupiedAreas.some((area) => {
+      return (
+        bounds.x < area.x + area.width &&
+        bounds.x + bounds.width > area.x &&
+        bounds.y < area.y + area.height &&
+        bounds.y + bounds.height > area.y
+      );
+    });
+  }
+
+  hash(x, y, seed = 12345) {
+    // Simple deterministic hash function
+    const hash = Math.sin(x * 12.9898 + y * 78.233 + seed) * 43758.5453;
+    return hash - Math.floor(hash); // Normalize to [0, 1]
+  }
+
 }
 
 

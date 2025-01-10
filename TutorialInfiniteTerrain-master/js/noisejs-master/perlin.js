@@ -271,6 +271,7 @@
         lerp(n01, n11, u),
        fade(y));
   };
+  
 
   // 3D Perlin Noise
   module.perlin3 = function(x, y, z) {

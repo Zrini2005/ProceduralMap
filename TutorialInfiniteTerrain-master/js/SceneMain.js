@@ -17,6 +17,9 @@ class SceneMain extends Phaser.Scene {
     this.load.image("smallHouse", "content/smallHouse.png");
     this.load.image('dungeon', 'content/dungeon.png');
     this.load.image("bush", "content/mountain_landscape.png");
+    this.load.image("asset1", "content/asset1.png");
+    this.load.image("asset2", "content/asset2.png");
+    this.load.image("asset3", "content/asset3.png");
     this.load.image("icedLake", "content/icedLake.png");
     this.load.spritesheet('adventurer', 'content/adventurer.webp', {
       frameWidth: 256, // Width of a single frame
@@ -71,41 +74,58 @@ class SceneMain extends Phaser.Scene {
       repeat: -1
     });
 
+
+    this.mapSize = 3000;
     this.chunkSize = 16;
     this.tileSize = 16;
     this.cameraSpeed = 10;
 
     this.cameras.main.setZoom(2);
     this.followPoint = new Phaser.Math.Vector2(
-      this.cameras.main.worldView.x + (this.cameras.main.worldView.width * 0.5),
-      this.cameras.main.worldView.y + (this.cameras.main.worldView.height * 0.5)
+      this.mapSize / 2,
+      this.mapSize / 2
     );
 
     this.chunks = [];
+    const centerX = (this.chunkSize * this.tileSize) / 2;
+    const centerY = (this.chunkSize * this.tileSize) / 2;
 
     this.keyW = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W);
     this.keyS = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
     this.keyA = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
     this.keyD = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
+    const middleChunkX = Math.floor(this.mapSize / 2);
+    const middleChunkY = Math.floor(this.mapSize / 2);
 
-    this.player = this.add.sprite(this.cameras.main.width / 2, this.cameras.main.height / 2, "adventurer");
-    this.player.setPosition(0, 0);
+    this.player = this.add.sprite(middleChunkX,middleChunkY, 'adventurer');
+    //this.player.setPosition(1, 1);
+    
     this.player.setDepth(10);
     this.player.setScale(0.3); // Adjust player size to fit screen
 
-    const dungeonRadius = 20;  
-    const randomAngle = Phaser.Math.FloatBetween(0, Math.PI * 2);  
-    const randomDistance = Phaser.Math.FloatBetween(0, dungeonRadius);  
+    const dungeonRadius = 20;
+    const randomAngle = Phaser.Math.FloatBetween(0, Math.PI * 2);
+    const randomDistance = Phaser.Math.FloatBetween(0, dungeonRadius);
 
     // Convert polar to Cartesian coordinates
     const dungeonX = this.player.x + Math.cos(randomAngle) * randomDistance;
     const dungeonY = this.player.y + Math.sin(randomAngle) * randomDistance;
 
     // Add the dungeon sprite
-    const dungeon = this.add.sprite(dungeonX, dungeonY, "dungeon");  
+    const dungeon = this.add.sprite(dungeonX, dungeonY, "dungeon");
     dungeon.setOrigin(0.5, 0.5);
-    dungeon.setScale(0.5);  
-    dungeon.setDepth(5);  
+    dungeon.setScale(0.5);
+    dungeon.setDepth(9.5);
+  }
+  isWithinBounds(chunkX, chunkY) {
+    // Check if the chunk is within the map boundary
+    const halfChunks = Math.floor(this.mapSize / (this.chunkSize * this.tileSize) / 2);
+    return (
+      chunkX >= -halfChunks &&
+      chunkX <= halfChunks &&
+      chunkY >= -halfChunks &&
+      chunkY <= halfChunks
+    );
   }
 
   getChunk(x, y) {
@@ -128,6 +148,7 @@ class SceneMain extends Phaser.Scene {
 
     for (var x = snappedChunkX - 2; x < snappedChunkX + 2; x++) {
       for (var y = snappedChunkY - 2; y < snappedChunkY + 2; y++) {
+        if (!this.isWithinBounds(x, y)) continue;
         var existingChunk = this.getChunk(x, y);
 
         if (existingChunk == null) {
@@ -172,6 +193,7 @@ class SceneMain extends Phaser.Scene {
     } else {
       this.player.play('idle', true);
     }
+
 
     this.cameras.main.centerOn(this.followPoint.x, this.followPoint.y);
     this.player.x = this.followPoint.x;
