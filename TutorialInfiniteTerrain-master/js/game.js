@@ -1,7 +1,9 @@
+import { DomainMap } from "./DomainMap.js";
+
 var config = {
   type: Phaser.WEBGL,
-  width: window.innerWidth-20,
-  height: window.innerHeight-20,
+  width: window.innerWidth,
+  height: window.innerHeight,
   backgroundColor: "black",
   physics: {
     default: "arcade",
@@ -10,7 +12,8 @@ var config = {
     }
   },
   scene: [
-    SceneMain
+    // SceneMain
+    DomainMap
   ],
   pixelArt: true,
   roundPixels: true

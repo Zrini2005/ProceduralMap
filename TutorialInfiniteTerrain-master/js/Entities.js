@@ -140,16 +140,16 @@ class Chunk {
     const tileSize = this.scene.tileSize;
     let assetType;
 
-    // Determine which asset to place based on hash value
-    if (hashValue > 0.1 && hashValue <= 0.105) {
-      assetType = "asset1";
-    } else if (hashValue > 0.5 && hashValue <= 0.505) {
-      assetType = "asset2";
-    } else if (hashValue > 0.995) {
-      assetType = "asset3";
-    } else {
-      return; // No asset to place for this tile
-    }
+    // // Determine which asset to place based on hash value
+    // if (hashValue > 0.1 && hashValue <= 0.105) {
+    //   assetType = "asset1";
+    // } else if (hashValue > 0.5 && hashValue <= 0.505) {
+    //   assetType = "asset2";
+    // } else if (hashValue > 0.995) {
+    //   assetType = "asset3";
+    // } else {
+    //   return; // No asset to place for this tile
+    // }
 
     // Get asset size for bounding box calculation
     const assetWidth = this.scene.textures.get(assetType).getSourceImage().width;
