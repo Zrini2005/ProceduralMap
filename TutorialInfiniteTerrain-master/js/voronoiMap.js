@@ -27,7 +27,7 @@ function drawPoints(canvas, points) {
 
 drawPoints(document.getElementById("diagram-points"), points);
 
-let delaunay = Delaunator.from(points, loc => loc.x, loc => loc.y)
+export let delaunay = Delaunator.from(points, loc => loc.x, loc => loc.y)
 
 function calculateCentroids(points, delaunay) {
   const numTriangles = delaunay.triangles.length / 3;
@@ -55,8 +55,8 @@ let map = {
   centers: calculateCentroids(points, delaunay)
 };
 
-function triangleOfEdge(e) { return Math.floor(e / 3); }
-function nextHalfedge(e) { return (e % 3 === 2) ? e - 2 : e + 1; }
+export function triangleOfEdge(e) { return Math.floor(e / 3); }
+export function nextHalfedge(e) { return (e % 3 === 2) ? e - 2 : e + 1; }
 
 function drawCellBoundaries(canvas, map) {
   let { points, centers, halfedges, triangles, numEdges } = map;
@@ -99,7 +99,7 @@ function assignElevation(map) {
 
 map.elevation = assignElevation(map);
 
-function edgesAroundPoint(delaunay, start) {
+export function edgesAroundPoint(delaunay, start) {
   const result = [];
   let incoming = start;
   do {
@@ -167,8 +167,8 @@ function biomeColor(map, r) {
     g = 185 - 45 * m;
     b = 139 - 45 * m;
     r = 255 * e + r * (1 - e);
-      g = 255 * e + g * (1 - e);
-      b = 255 * e + b * (1 - e);
+    g = 255 * e + g * (1 - e);
+    b = 255 * e + b * (1 - e);
   }
   return `rgb(${r | 0}, ${g | 0}, ${b | 0})`;
 }
@@ -208,4 +208,4 @@ drawCellColors(
   r => biomeColor(map, r)
 );
 
-export {map}
+export { map }

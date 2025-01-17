@@ -42,7 +42,7 @@ let map = {
   centers: calculateCentroids(points, delaunay)
 };
 
-function triangleOfEdge(e) { return Math.floor(e / 3); }
+export function triangleOfEdge(e) { return Math.floor(e / 3); }
 function nextHalfedge(e) { return (e % 3 === 2) ? e - 2 : e + 1; }
 
 const WAVELENGTH = 0.5;
@@ -64,7 +64,7 @@ function assignElevation(map) {
 
 map.elevation = assignElevation(map);
 
-function edgesAroundPoint(delaunay, start) {
+export function edgesAroundPoint(delaunay, start) {
   const result = [];
   let incoming = start;
   do {
@@ -102,13 +102,14 @@ points.push({ y: GRIDSIZE + 10, x: -10 });
 delaunay = Delaunator.from(points, loc => loc.x, loc => loc.y);
 map = {
   points,
-  numregions: points.length,
-  numtriangles: delaunay.halfedges.length / 3,
-  numedges: delaunay.halfedges.length,
+  numRegions: points.length,
+  numTriangles: delaunay.halfedges.length / 3,
+  numEdges: delaunay.halfedges.length,
   halfedges: delaunay.halfedges,
   triangles: delaunay.triangles,
   centers: calculateCentroids(points, delaunay)
 };
+
 map.elevation = assignElevation(map);
 map.moisture = assignMoisture(map);
 
@@ -118,4 +119,4 @@ map.moisture = assignMoisture(map);
 //   r => biomecolor(map, r)
 // );
 
-export {map, points}
+export {map, points, nextHalfedge, delaunay}

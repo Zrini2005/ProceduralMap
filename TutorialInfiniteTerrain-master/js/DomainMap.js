@@ -1,5 +1,5 @@
 import "./voronoi-helper/polygons.js"
-import { map, points } from "./voronoi-helper/polygons.js";
+import { map, points, triangleOfEdge, nextHalfedge, edgesAroundPoint, delaunay } from "./voronoi-helper/polygons.js";
 
 export class DomainMap extends Phaser.Scene {
   constructor() {
@@ -52,11 +52,14 @@ export class DomainMap extends Phaser.Scene {
 
     this.cameraSpeed = 10;
     this.mapSize = 3000;
-    this.cameras.main.setZoom(2);
+    this.cameras.main.setZoom(1);
     this.followPoint = new Phaser.Math.Vector2(
-      this.mapSize / 2,
-      this.mapSize / 2
+      0, 0
     );
+    // this.followPoint = new Phaser.Math.Vector2(
+    //   this.mapSize / 2,
+    //   this.mapSize / 2
+    // );
 
     // this.chunks = [];
 
@@ -64,51 +67,83 @@ export class DomainMap extends Phaser.Scene {
     this.keyS = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
     this.keyA = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
     this.keyD = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
-    const middleChunkX = Math.floor(this.mapSize / 2);
-    const middleChunkY = Math.floor(this.mapSize / 2);
+    // const middleChunkX = Math.floor(this.mapSize / 2);
+    // const middleChunkY = Math.floor(this.mapSize / 2);
 
     // this.player = this.add.sprite(middleChunkX, middleChunkY, 'adventurer');
-    this.player = this.add.sprite(400, 300, 'adventurer');
+    this.player = this.add.sprite(300, 400, 'adventurer');
     // this.player.setPosition(1, 1);
-
     this.player.setDepth(10);
     this.player.setScale(0.3); // Adjust player size to fit screen
 
     // Use a Phaser.Graphics object to draw the Delaunay triangles
-    const graphics = this.add.graphics();
-    graphics.lineStyle(2, 0x00ff00, 1); // Set line style (green color for triangles)
+    let graphics = this.add.graphics();
+    // graphics.lineStyle(5, 0xFF0000, 1.0);
+    // graphics.moveTo(0, 0);
+    // graphics.lineTo(20,30)
+    // graphics.closePath();
+    // graphics.strokePath();
 
-    // Assuming you have the `delaunay` object and `points` array
-    for (let i = 0; i < map.triangles.length; i += 3) {
-      const p0 = points[map.triangles[i]];
-      console.log(p0);
-      const p1 = points[map.triangles[i + 1]];
-      const p2 = points[map.triangles[i + 2]];
-
-      // Extract x, y coordinates
-      const [x0, y0] = [p0[0], p0[1]];
-      const [x1, y1] = [p1[0], p1[1]];
-      const [x2, y2] = [p2[0], p2[1]];
-
-      // Draw the triangle
-      graphics.beginPath();
-      graphics.moveTo(x0, y0);
-      graphics.lineTo(x1, y1);
-      graphics.lineTo(x2, y2);
-      graphics.closePath();
-      graphics.strokePath();
-
-      // Calculate centroid of the triangle to place the sprite
-      const cx = (x0 + x1 + x2) / 3;
-      const cy = (y0 + y1 + y2) / 3;
-
-      // Place a sprite at the centroid of the triangle
-      this.add.sprite(cx * 100, cy * 100, 'sprSand');
+    function drawCellColors(graphics, map, colorFn) {
+      const { triangles, numEdges, centers } = map;
+      let seen = new Set();  // of region ids
+      // console.log(numEdges, triangles, centers)
+      graphics.lineStyle(1, 0xFF5733, 1.0);
+      for (let i = 0; i < numEdges; i++) {
+        const r = triangles[nextHalfedge(i)];
+        if (!seen.has(r)) {
+          seen.add(r);
+          let vertices = edgesAroundPoint(delaunay, i).map(i => centers[triangleOfEdge(i)]);
+          // graphics.fillStyle(colorFn(r));
+          graphics.beginPath();
+          graphics.moveTo(vertices[0].x * 100, vertices[0].y * 100);
+          for (let j = 1; j < vertices.length; j++) {
+            graphics.lineTo(vertices[j].x * 100, vertices[j].y * 100);
+            // console.log(vertices[j].x, vertices[j].y);
+          }
+          graphics.closePath();
+          graphics.strokePath();
+        }
+      }
     }
+
+    drawCellColors(graphics, map, r => map.elevation[r] < 0.5 ? "0x5959a6" : "0x111110");
+
+
+    function placeSprites(map) {
+
+    }
+
+    // for (let i = 0; i < map.triangles.length; i += 3) {
+    //   const p0 = points[map.triangles[i]];
+    //   console.log(p0);
+    //   const p1 = points[map.triangles[i + 1]];
+    //   const p2 = points[map.triangles[i + 2]];
+
+    //   // Extract x, y coordinates
+    //   const [x0, y0] = [p0[0], p0[1]];
+    //   const [x1, y1] = [p1[0], p1[1]];
+    //   const [x2, y2] = [p2[0], p2[1]];
+
+    //   // Draw the triangle
+    //   graphics.beginPath();
+    //   graphics.moveTo(x0, y0);
+    //   graphics.lineTo(x1, y1);
+    //   graphics.lineTo(x2, y2);
+    //   graphics.closePath();
+    //   graphics.strokePath();
+
+    //   // Calculate centroid of the triangle to place the sprite
+    //   const cx = (x0 + x1 + x2) / 3;
+    //   const cy = (y0 + y1 + y2) / 3;
+
+    //   // Place a sprite at the centroid of the triangle
+    //   this.add.sprite(cx * 100, cy * 100, 'sprSand');
+    // }
   }
 
   update() {
-    
+
     if (this.keyW.isDown) {
       this.followPoint.y -= this.cameraSpeed;
       this.player.play('walk-up', true);
