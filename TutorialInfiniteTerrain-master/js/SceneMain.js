@@ -1,6 +1,7 @@
 class SceneMain extends Phaser.Scene {
   constructor() {
     super({ key: "SceneMain" });
+
   }
 
   preload() {
@@ -75,12 +76,18 @@ class SceneMain extends Phaser.Scene {
     });
 
 
-    this.mapSize = 3000;
+    this.mapSize = 1000;
     this.chunkSize = 16;
     this.tileSize = 16;
-    this.cameraSpeed = 10;
+    this.cameraSpeed = 50;
+    this.vertices = this.generateVoronoiPoints(
+      5,       // Number of points
+      -20000,  // Min range
+      20000,   // Max range
+      this.mapSize + 1000 // Minimum distance between points
+    );
 
-    this.cameras.main.setZoom(2);
+    this.cameras.main.setZoom(1);
     this.followPoint = new Phaser.Math.Vector2(
       this.mapSize / 2,
       this.mapSize / 2
@@ -97,9 +104,9 @@ class SceneMain extends Phaser.Scene {
     const middleChunkX = Math.floor(this.mapSize / 2);
     const middleChunkY = Math.floor(this.mapSize / 2);
 
-    this.player = this.add.sprite(middleChunkX,middleChunkY, 'adventurer');
+    this.player = this.add.sprite(middleChunkX, middleChunkY, 'adventurer');
     //this.player.setPosition(1, 1);
-    
+
     this.player.setDepth(10);
     this.player.setScale(0.3); // Adjust player size to fit screen
 
@@ -118,15 +125,105 @@ class SceneMain extends Phaser.Scene {
     dungeon.setDepth(9.5);
   }
   isWithinBounds(chunkX, chunkY) {
-    // Check if the chunk is within the map boundary
+    // Check if the chunk is within the map boundary (center map)
     const halfChunks = Math.floor(this.mapSize / (this.chunkSize * this.tileSize) / 2);
-    return (
+    const isInCenterMap =
       chunkX >= -halfChunks &&
       chunkX <= halfChunks &&
       chunkY >= -halfChunks &&
-      chunkY <= halfChunks
-    );
+      chunkY <= halfChunks;
+
+    if (isInCenterMap) {
+      return { withinBounds: true, biomeType: 'biome1'};
+    }
+
+    // Check if the chunk is within the boundaries of any biome (centered at each vertex)
+    const chunkCenterX = chunkX * this.chunkSize * this.tileSize;
+    const chunkCenterY = chunkY * this.chunkSize * this.tileSize;
+
+    // Check if the chunk falls within any square biome boundary
+    for (let vertex of this.vertices) {
+      const halfSize = this.mapSize / 2; // Half the biome size
+      if (
+        chunkCenterX >= vertex.x - halfSize &&
+        chunkCenterX <= vertex.x + halfSize &&
+        chunkCenterY >= vertex.y - halfSize &&
+        chunkCenterY <= vertex.y + halfSize
+      ) {
+        return { withinBounds: true, biomeType: vertex.biome };
+      }
+    }
+
+    // Return false if chunk is outside both the center map and biomes
+    return { withinBounds: false, biomeType: null };
+}
+
+
+
+  assignBiomes(points) {
+    const biomeAssignments = [
+      { type: 'biome1', count: 2 },
+      { type: 'biome2', count: 3 }
+    ];
+
+    let biomes = [];
+
+    biomeAssignments.forEach((assignment, index) => {
+      for (let i = 0; i < assignment.count; i++) {
+        if (points.length > 0) {
+          const vertex = points.shift();
+          biomes.push({
+            ...vertex,
+            biome: assignment.type
+          });
+        }
+      }
+    });
+
+    return biomes;
   }
+
+
+  generateVoronoiPoints(count, min, max, minDistance) {
+    const points = [];
+    let attempts = 0;
+    const biomeTypes = ['biome1', 'biome2']; // Define available biomes
+
+    while (points.length < count && attempts < 1000) {
+      attempts++;
+
+      // Generate a random point within the range
+      const candidate = {
+        x: Phaser.Math.Between(min, max),
+        y: Phaser.Math.Between(min, max),
+        biome: Phaser.Utils.Array.GetRandom(biomeTypes)
+      };
+
+      // Check if the candidate point is valid (not too close to others)
+      const isValid = points.every((point) => {
+        const distance = Phaser.Math.Distance.Between(
+          point.x,
+          point.y,
+          candidate.x,
+          candidate.y
+        );
+        return distance >= minDistance;
+      });
+
+      // Add the candidate if it passes the validation
+      if (isValid) {
+        points.push(candidate);
+        console.log(candidate);
+      }
+    }
+
+    if (points.length < count) {
+      console.warn("Could not generate the required number of points.");
+    }
+
+    return points;
+  }
+
 
   getChunk(x, y) {
     var chunk = null;
@@ -138,6 +235,7 @@ class SceneMain extends Phaser.Scene {
     return chunk;
   }
 
+
   update() {
 
     var snappedChunkX = (this.chunkSize * this.tileSize) * Math.round(this.followPoint.x / (this.chunkSize * this.tileSize));
@@ -148,13 +246,19 @@ class SceneMain extends Phaser.Scene {
 
     for (var x = snappedChunkX - 2; x < snappedChunkX + 2; x++) {
       for (var y = snappedChunkY - 2; y < snappedChunkY + 2; y++) {
-        if (!this.isWithinBounds(x, y)) continue;
+        const result = this.isWithinBounds(x , y);
+        if (!result.withinBounds) continue;
         var existingChunk = this.getChunk(x, y);
 
         if (existingChunk == null) {
-          var newChunk = new Chunk(this, x, y);
+          if(result.biomeType === 'biome1') {
+          var newChunk = new Biome1(this, x, y);
+          } else {
+            var newChunk = new Biome2(this, x, y);
+          }
           this.chunks.push(newChunk);
         }
+
       }
     }
 
@@ -178,6 +282,7 @@ class SceneMain extends Phaser.Scene {
       }
     }
 
+
     if (this.keyW.isDown) {
       this.followPoint.y -= this.cameraSpeed;
       this.player.play('walk-up', true);
@@ -194,9 +299,45 @@ class SceneMain extends Phaser.Scene {
       this.player.play('idle', true);
     }
 
+    console.log(this.followPoint.x, this.followPoint.y);
+
+
 
     this.cameras.main.centerOn(this.followPoint.x, this.followPoint.y);
     this.player.x = this.followPoint.x;
     this.player.y = this.followPoint.y;
   }
+  getBiomeTypeForChunk(chunkX, chunkY) {
+    if (this.vertices.length === 0) {
+      console.warn("No vertices available to determine biome type.");
+      return 'biome1'; // Provide a default biome type if necessary
+    }
+    const closestVertex = this.vertices.reduce((prev, curr) => {
+      const prevDistance = Phaser.Math.Distance.Between(chunkX * this.chunkSize * this.tileSize, chunkY * this.chunkSize * this.tileSize, prev.x, prev.y);
+      const currDistance = Phaser.Math.Distance.Between(chunkX * this.chunkSize * this.tileSize, chunkY * this.chunkSize * this.tileSize, curr.x, curr.y);
+      return (currDistance < prevDistance) ? curr : prev;
+    });
+    console.log(`Biome type found: ${closestVertex.biomeType}`);
+
+    return closestVertex.biomeType;
+  }
+  createChunk(x, y, biomeType) {
+    let chunk;
+    switch (biomeType) {
+      case 'biome1':
+        chunk = new Biome1(this, x, y);
+        break;
+      case 'biome2':
+        chunk = new Biome2(this, x, y);
+        break;
+      default:
+        chunk = new Biome1(this, x, y);
+    }
+    return chunk;
+  }
+  chunkExists(chunkX, chunkY, biomeType) {
+    // Check if a chunk with the same coordinates and biome type already exists
+    return this.chunks.some(chunk => chunk.x === chunkX && chunk.y === chunkY && chunk.biome === biomeType);
+  }
+
 }
