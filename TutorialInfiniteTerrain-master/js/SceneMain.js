@@ -80,14 +80,154 @@ class SceneMain extends Phaser.Scene {
     this.chunkSize = 16;
     this.tileSize = 16;
     this.cameraSpeed = 50;
-    this.vertices = this.generateVoronoiPoints(
-      5,       // Number of points
-      -20000,  // Min range
-      20000,   // Max range
-      this.mapSize + 1000 // Minimum distance between points
-    );
+    this.vertices = [
+      {
+        type: "sand",
+        vertices: [
+          { x: 0, y: 0 },
+          { x: 3000, y: 0 }, 
+          { x: 0, y: 3000 } 
+        ],
+      },
+      // {
+      //   type: "grass",
+      //   vertices: [
+      //     { x: 4042.478093507959, y: 4298.444218253445 },
+      //     { x: 2488.4553597323147, y: 5127.3722514841975 },
+      //     { x: 0, y: 4096.61555427585 },
+      //     { x: 0, y: 3841.6829266297827 },
+      //     { x: 2277.5382607784486, y: 2938.418333249916 },
+      //     { x: 4042.478093507959, y: 4298.444218253445 },
+      //   ],
+      // },
+      // {
+      //   type: "water",
+      //   vertices: [
+      //     { x: 0, y: 4096.61555427585 },
+      //     { x: 2488.4553597323147, y: 5127.3722514841975 },
+      //     { x: 3210.032121527268, y: 6580.234799747971 },
+      //     { x: 0, y: 7531.489492950001 },
+      //     { x: 0, y: 4096.61555427585 },
+      //   ],
+      // },
+      // {
+      //   type: "sand",
+      //   vertices: [
+      //     { x: 3448.528108230083, y: 8784.363792166345 },
+      //     { x: 3073.3481548625327, y: 8930.252702518479 },
+      //     { x: 0, y: 8574.447172215752 },
+      //     { x: 0, y: 7531.489492950001 },
+      //     { x: 3210.032121527268, y: 6580.234799747971 },
+      //     { x: 3438.8711430156422, y: 6726.6557391793895 },
+      //     { x: 3448.528108230083, y: 8784.363792166345 },
+      //   ],
+      // },
+      // {
+      //   type: "grass",
+      //   vertices: [
+      //     { x: 0, y: 8574.447172215752 },
+      //     { x: 3073.3481548625327, y: 8930.252702518479 },
+      //     { x: 2565.1295860034297, y: 11235.098874186566 },
+      //     { x: 0, y: 11161.045945485452 },
+      //     { x: 0, y: 8574.447172215752 },
+      //   ],
+      // },
+      // {
+      //   type: "water",
+      //   vertices: [
+      //     { x: 0, y: 11161.045945485452 },
+      //     { x: 2565.1295860034297, y: 11235.098874186566 },
+      //     { x: 3033.4160993121563, y: 11620.013641586696 },
+      //     { x: 3104.0089613615646, y: 12000 },
+      //     { x: 0, y: 12000 },
+      //     { x: 0, y: 11161.045945485452 },
+      //   ],
+      // },
+      // {
+      //   type: "sand",
+      //   vertices: [
+      //     { x: 4838.897317535155, y: 3721.1349305970275 },
+      //     { x: 3191.2751126712146, y: 2129.3549445847802 },
+      //     { x: 3731.0217908046175, y: 0 },
+      //     { x: 4212.8590382308885, y: 0 },
+      //     { x: 5688.689523245628, y: 3213.7175640036926 },
+      //     { x: 4838.897317535155, y: 3721.1349305970275 },
+      //   ],
+      // },
+      // {
+      //   type: "grass",
+      //   vertices: [
+      //     { x: 4042.478093507959, y: 4298.444218253445 },
+      //     { x: 2277.5382607784486, y: 2938.418333249916 },
+      //     { x: 3191.2751126712146, y: 2129.3549445847802 },
+      //     { x: 4838.897317535155, y: 3721.1349305970275 },
+      //     { x: 4521.8057593838585, y: 4238.034733788111 },
+      //     { x: 4042.478093507959, y: 4298.444218253445 },
+      //   ],
+      // },
+      // {
+      //   type: "water",
+      //   vertices: [
+      //     { x: 4881.542251970956, y: 6153.938653849264 },
+      //     { x: 3438.8711430156422, y: 6726.6557391793895 },
+      //     { x: 3210.032121527268, y: 6580.234799747971 },
+      //     { x: 2488.4553597323147, y: 5127.3722514841975 },
+      //     { x: 4042.478093507959, y: 4298.444218253445 },
+      //     { x: 4521.8057593838585, y: 4238.034733788111 },
+      //     { x: 4971.436881759294, y: 5783.713890531739 },
+      //     { x: 4881.542251970956, y: 6153.938653849264 },
+      //   ],
+      // },
+      // {
+      //   type: "sand",
+      //   vertices: [
+      //     { x: 5518.681431946719, y: 6905.156232636045 },
+      //     { x: 4031.1962278043634, y: 8989.352185664939 },
+      //     { x: 3448.528108230083, y: 8784.363792166345 },
+      //     { x: 3438.8711430156422, y: 6726.6557391793895 },
+      //     { x: 4881.542251970956, y: 6153.938653849264 },
+      //     { x: 5518.681431946719, y: 6905.156232636045 },
+      //   ],
+      // },
+      // {
+      //   type: "grass",
+      //   vertices: [
+      //     { x: 4670.680115215815, y: 9456.595979807087 },
+      //     { x: 4323.902975384821, y: 10927.146981618636 },
+      //     { x: 3033.4160993121563, y: 11620.013641586696 },
+      //     { x: 2565.1295860034297, y: 11235.098874186566 },
+      //     { x: 3073.3481548625327, y: 8930.252702518479 },
+      //     { x: 3448.528108230083, y: 8784.363792166345 },
+      //     { x: 4031.1962278043634, y: 8989.352185664939 },
+      //     { x: 4670.680115215815, y: 9456.595979807087 },
+      //   ],
+      // },
+      // {
+      //   type: "water",
+      //   vertices: [
+      //     { x: 5219.892966035925, y: 11843.154400040916 },
+      //     { x: 5226.037018727953, y: 12000 },
+      //     { x: 3104.0089613615646, y: 12000 },
+      //     { x: 3033.4160993121563, y: 11620.013641586696 },
+      //     { x: 4323.902975384821, y: 10927.146981618636 },
+      //     { x: 5219.892966035925, y: 11843.154400040916 },
+      //   ],
+      // },
+      // {
+      //   type: "sand",
+      //   vertices: [
+      //     { x: 7317.258308301881, y: 0 },
+      //     { x: 6965.093071074907, y: 2507.460490293406 },
+      //     { x: 6288.709746490591, y: 3220.001296581163 },
+      //     { x: 5688.689523245628, y: 3213.7175640036926 },
+      //     { x: 4212.8590382308885, y: 0 },
+      //     { x: 7317.258308301881, y: 0 },
+      //   ],
+      // },
+      // Add remaining polygons up to 36 using the same format
+    ];
 
-    this.cameras.main.setZoom(1);
+    this.cameras.main.setZoom(0.1);
     this.followPoint = new Phaser.Math.Vector2(
       this.mapSize / 2,
       this.mapSize / 2
@@ -125,38 +265,33 @@ class SceneMain extends Phaser.Scene {
     dungeon.setDepth(9.5);
   }
   isWithinBounds(chunkX, chunkY) {
-    // Check if the chunk is within the map boundary (center map)
-    const halfChunks = Math.floor(this.mapSize / (this.chunkSize * this.tileSize) / 2);
-    const isInCenterMap =
-      chunkX >= -halfChunks &&
-      chunkX <= halfChunks &&
-      chunkY >= -halfChunks &&
-      chunkY <= halfChunks;
-
-    if (isInCenterMap) {
-      return { withinBounds: true, biomeType: 'biome1'};
-    }
+     
 
     // Check if the chunk is within the boundaries of any biome (centered at each vertex)
     const chunkCenterX = chunkX * this.chunkSize * this.tileSize;
     const chunkCenterY = chunkY * this.chunkSize * this.tileSize;
 
     // Check if the chunk falls within any square biome boundary
-    for (let vertex of this.vertices) {
-      const halfSize = this.mapSize / 2; // Half the biome size
-      if (
-        chunkCenterX >= vertex.x - halfSize &&
-        chunkCenterX <= vertex.x + halfSize &&
-        chunkCenterY >= vertex.y - halfSize &&
-        chunkCenterY <= vertex.y + halfSize
-      ) {
-        return { withinBounds: true, biomeType: vertex.biome };
+    for (let polygon of this.vertices) {
+      if (this.isPointInPolygon({ x: chunkCenterX, y: chunkCenterY }, polygon.vertices)) {
+        return { withinBounds: true, biomeType: polygon.type };
       }
     }
 
-    // Return false if chunk is outside both the center map and biomes
     return { withinBounds: false, biomeType: null };
-}
+  }
+  isPointInPolygon(point, vertices) {
+    let inside = false;
+    for (let i = 0, j = vertices.length - 1; i < vertices.length; j = i++) {
+      const xi = vertices[i].x, yi = vertices[i].y;
+      const xj = vertices[j].x, yj = vertices[j].y;
+  
+      const intersect = ((yi > point.y) !== (yj > point.y)) &&
+                        (point.x < ((xj - xi) * (point.y - yi)) / (yj - yi) + xi);
+      if (intersect) inside = !inside;
+    }
+    return inside;
+  }
 
 
 
@@ -243,16 +378,17 @@ class SceneMain extends Phaser.Scene {
 
     snappedChunkX = snappedChunkX / this.chunkSize / this.tileSize;
     snappedChunkY = snappedChunkY / this.chunkSize / this.tileSize;
+    console.log("snaapp:",snappedChunkX, snappedChunkY);
 
     for (var x = snappedChunkX - 2; x < snappedChunkX + 2; x++) {
       for (var y = snappedChunkY - 2; y < snappedChunkY + 2; y++) {
-        const result = this.isWithinBounds(x , y);
+        const result = this.isWithinBounds(x, y);
         if (!result.withinBounds) continue;
         var existingChunk = this.getChunk(x, y);
 
         if (existingChunk == null) {
-          if(result.biomeType === 'biome1') {
-          var newChunk = new Biome1(this, x, y);
+          if (result.biomeType === 'grass') {
+            var newChunk = new Biome1(this, x, y);
           } else {
             var newChunk = new Biome2(this, x, y);
           }

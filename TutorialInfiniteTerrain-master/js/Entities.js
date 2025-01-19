@@ -257,14 +257,12 @@ class Biome2 {
           //   waterTiles.push({ x: tileX, y: tileY });
           // }
           if ( perlinValue < 0.1) {
-            key = "sprGrass";
-            waterTiles.push({ x: tileX, y: tileY });
+            key = "sprNewTry"; 
           } else if(perlinValue >= 0.1 && perlinValue < 0.2){
             key = "sprNewTry";
             
           } else if (perlinValue >= 0.2) {
-            key = "sprSand";
-            grassTiles.push({ x: tileX, y: tileY }); // Add grass tile position
+            key = "sprNewTry"; 
           }
 
           // Add the main tile sprite
